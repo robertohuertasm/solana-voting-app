@@ -1,18 +1,24 @@
 import * as anchor from '@coral-xyz/anchor';
 import { Program } from '@coral-xyz/anchor';
-import { PublicKey } from '@solana/web3.js';
+import { Keypair, PublicKey } from '@solana/web3.js';
 import { Votingapp } from '../target/types/votingapp';
 
-describe('votingapp', () => {
-  // Configure the client to use the local cluster.
-  const provider = anchor.AnchorProvider.env();
-  anchor.setProvider(provider);
+describe('voting.basic.test', () => {
+  async function setup() {
+    // Configure the client to use the local cluster.
+    const provider = anchor.AnchorProvider.env();
+    anchor.setProvider(provider);
 
-  // NOTE: Anchor will use the wallet as the default signer.
-  // const payer = provider.wallet as anchor.Wallet;
-  const program = anchor.workspace.Votingapp as Program<Votingapp>;
+    // NOTE: Anchor will use the wallet as the default signer.
+    const payer = provider.wallet;
+    const program = anchor.workspace.Votingapp as Program<Votingapp>;
 
-  it('Initialize Poll', async () => {
+    return { provider, payer, program };
+  }
+
+  it('should initialize a poll', async () => {
+    const { program } = await setup();
+
     const [pollAddress] = PublicKey.findProgramAddressSync(
       [new anchor.BN(1).toArrayLike(Buffer, 'le', 8)],
       program.programId,
@@ -46,7 +52,9 @@ describe('votingapp', () => {
     expect(currentPoll.candidateAmount.toNumber()).toEqual(0);
   });
 
-  it('Initialize Candidate', async () => {
+  it('should initialize a candidate', async () => {
+    const { program } = await setup();
+
     const [pollAddress] = PublicKey.findProgramAddressSync(
       [new anchor.BN(1).toArrayLike(Buffer, 'le', 8)],
       program.programId,
@@ -95,6 +103,8 @@ describe('votingapp', () => {
   });
 
   it('should vote for a candidate', async () => {
+    const { program } = await setup();
+
     const [pollAddress] = PublicKey.findProgramAddressSync(
       [new anchor.BN(1).toArrayLike(Buffer, 'le', 8)],
       program.programId,

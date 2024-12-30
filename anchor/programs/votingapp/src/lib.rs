@@ -29,7 +29,8 @@ pub mod votingapp {
         let candidate = &mut ctx.accounts.candidate;
         candidate.candidate_name = candidate_name;
         candidate.candidate_votes = 0;
-
+        
+        msg!("Candidate {} initialized", candidate.candidate_name);
         Ok(())
     }
 
