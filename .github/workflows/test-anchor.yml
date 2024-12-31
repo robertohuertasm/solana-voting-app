@@ -37,8 +37,8 @@ jobs:
       - name: Check solana config
         run: solana config get
 
-      - run: npm run anchor build
-        shell: bash
+      # - run: npm run anchor build
+      #   shell: bash
 
       - run: npm run anchor test
         shell: bash
