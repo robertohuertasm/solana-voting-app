@@ -5,7 +5,6 @@ import { Votingapp } from '../target/types/votingapp';
 
 import { startAnchor } from 'solana-bankrun';
 import { BankrunProvider } from 'anchor-bankrun';
-import { before } from 'node:test';
 
 const IDL = require('../target/idl/votingapp.json');
 const PROGRAM_ID = new PublicKey(IDL.address);
@@ -18,17 +17,31 @@ describe('voting.bankrun.test', () => {
       [],
     );
     const provider = new BankrunProvider(context);
+
     const payer = provider.wallet as anchor.Wallet;
     const program = new anchor.Program<Votingapp>(IDL, provider);
 
     return { context, provider, payer, program };
   }
 
+  function localValidatorSetup() {
+    // NOTE: Anchor will use the wallet as the default signer.
+    // const payer = provider.wallet;
+    program = anchor.workspace.Votingapp as Program<Votingapp>;
+    const provider = anchor.AnchorProvider.env();
+    anchor.setProvider(provider);
+  }
+
   let program: Program<Votingapp>;
 
   beforeAll(async () => {
+    // bankrun setup
     const { program: _program } = await setup();
     program = _program;
+
+    // uncomment the line below is you wan to run against your solana-test-validator
+    // remember to run `anchor test --skip-build --skip-deploy --skip-local-validator
+    // localValidatorSetup();
   });
 
   it('should initialize a poll', async () => {
@@ -59,24 +72,39 @@ describe('voting.bankrun.test', () => {
     );
 
     let tx = await program.methods
-      .initializeCandidate('Roberto', new anchor.BN(1))
+      .initializeCandidate('red', new anchor.BN(1))
       .accountsPartial({
         poll: pollAddress,
       })
       .rpc();
 
-    const [robertoAddress] = PublicKey.findProgramAddressSync(
-      [Buffer.from('Roberto'), new anchor.BN(1).toArrayLike(Buffer, 'le', 8)],
+    tx = await program.methods
+      .initializeCandidate('green', new anchor.BN(1))
+      .accountsPartial({
+        poll: pollAddress,
+      })
+      .rpc();
+
+    const [redAddress] = PublicKey.findProgramAddressSync(
+      [Buffer.from('red'), new anchor.BN(1).toArrayLike(Buffer, 'le', 8)],
       program.programId,
     );
 
-    const roberto = await program.account.candidate.fetch(robertoAddress);
+    const [greenAddress] = PublicKey.findProgramAddressSync(
+      [Buffer.from('green'), new anchor.BN(1).toArrayLike(Buffer, 'le', 8)],
+      program.programId,
+    );
+
+    const red = await program.account.candidate.fetch(redAddress);
+    const green = await program.account.candidate.fetch(greenAddress);
 
     const currentPoll = await program.account.poll.fetch(pollAddress);
 
-    expect(roberto.candidateName).toEqual('Roberto');
-    expect(roberto.candidateVotes.toNumber()).toEqual(0);
-    expect(currentPoll.candidateAmount.toNumber()).toEqual(1);
+    expect(red.candidateName).toEqual('red');
+    expect(red.candidateVotes.toNumber()).toEqual(0);
+    expect(green.candidateName).toEqual('green');
+    expect(green.candidateVotes.toNumber()).toEqual(0);
+    expect(currentPoll.candidateAmount.toNumber()).toEqual(2);
   });
 
   it('should vote for a candidate', async () => {
@@ -85,22 +113,22 @@ describe('voting.bankrun.test', () => {
       program.programId,
     );
 
-    const [robertoAddress] = PublicKey.findProgramAddressSync(
-      [Buffer.from('Roberto'), new anchor.BN(1).toArrayLike(Buffer, 'le', 8)],
+    const [redAddress] = PublicKey.findProgramAddressSync(
+      [Buffer.from('red'), new anchor.BN(1).toArrayLike(Buffer, 'le', 8)],
       program.programId,
     );
 
     const tx = await program.methods
-      .vote('Roberto', new anchor.BN(1))
+      .vote('red', new anchor.BN(1))
       .accountsPartial({
         poll: pollAddress,
-        candidate: robertoAddress,
+        candidate: redAddress,
       })
       .rpc();
 
-    const roberto = await program.account.candidate.fetch(robertoAddress);
+    const red = await program.account.candidate.fetch(redAddress);
 
-    expect(roberto.candidateName).toEqual('Roberto');
-    expect(roberto.candidateVotes.toNumber()).toEqual(1);
+    expect(red.candidateName).toEqual('red');
+    expect(red.candidateVotes.toNumber()).toEqual(1);
   });
 });
