@@ -24,7 +24,7 @@ cd <repo-name>
 #### Install Dependencies
 
 ```shell
-pnpm install
+npm install
 ```
 
 #### Start the web app
@@ -41,7 +41,7 @@ This is a Solana program written in Rust using the Anchor framework.
 
 #### Commands
 
-You can use any normal anchor commands. Either move to the `anchor` directory and run the `anchor` command or prefix the command with `pnpm`, eg: `pnpm anchor`.
+You can use any normal anchor commands. Either move to the `anchor` directory and run the `anchor` command or prefix the command with `npm`, eg: `npm anchor`.
 
 #### Sync the program id:
 
@@ -50,31 +50,31 @@ Running this command will create a new keypair in the `anchor/target/deploy` dir
 You will manually need to update the constant in `anchor/lib/counter-exports.ts` to match the new program id.
 
 ```shell
-pnpm anchor keys sync
+npm run anchor keys sync
 ```
 
 #### Build the program:
 
 ```shell
-pnpm anchor-build
+npm run anchor-build
 ```
 
 #### Start the test validator with the program deployed:
 
 ```shell
-pnpm anchor-localnet
+npm run anchor-localnet
 ```
 
 #### Run the tests
 
 ```shell
-pnpm anchor-test
+npm run anchor-test
 ```
 
 #### Deploy to Devnet
 
 ```shell
-pnpm anchor deploy --provider.cluster devnet
+npm run anchor deploy --provider.cluster devnet
 ```
 
 ### web
@@ -86,11 +86,11 @@ This is a React app that uses the Anchor generated client to interact with the S
 Start the web app
 
 ```shell
-pnpm dev
+npm run dev
 ```
 
 Build the web app
 
 ```shell
-pnpm build
+npm run build
 ```
