@@ -1,5 +1,7 @@
 # voting-app
 
+Voting Dapp + Solana Blink
+
 ## Getting Started
 
 ### Prerequisites
